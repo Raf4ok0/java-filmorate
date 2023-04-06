@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.Exception.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.Exception.ValidationException;
+import ru.yandex.practicum.filmorate.Exception.AlreadyExistException;
+import ru.yandex.practicum.filmorate.Exception.NotExistException;
 import ru.yandex.practicum.filmorate.Validators.FilmValidator;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -13,12 +12,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    Integer filmId = 0;
+    private final Map<Long, Film> films = new HashMap<>();
+    long filmId = 0L;
 
     @GetMapping
     public Collection<Film> allFilms() {
@@ -27,33 +26,30 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        if (!FilmValidator.validate(film))
-            throw new ValidationException("Ошибка валидации");
-        if (films.containsKey(film.getId())) {
-            throw new FilmAlreadyExistException("Фильм " +
-                    film.getName() + " уже добавлен.");
-        } else {
-            Integer id = generateFilmId();
+        FilmValidator.validate(film);
+        if (!films.containsKey(film.getId())) {
+            long id = generateFilmId();
             film.setId(id);
             films.put(film.getId(), film);
             log.info("Добавлен фильм " + film.getName());
+            return film;
         }
-        return film;
+        throw new AlreadyExistException("Фильм " +
+                film.getName() + " уже добавлен.");
     }
 
     @PutMapping
     public Film put(@RequestBody Film film) {
-        if (!FilmValidator.validate(film))
-            throw new ValidationException("Ошибка валидации");
-        else {
-            FilmValidator.checkIfFilmExists(film, films);
+        FilmValidator.validate(film);
+        if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.info("Обновлены данные фильма " + film.getName());
+            return film;
         }
-        return film;
+        throw new NotExistException("Такого фильма нет");
     }
 
-    public Integer generateFilmId() {
+    public long generateFilmId() {
         filmId++;
         return filmId;
     }
