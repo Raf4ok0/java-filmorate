@@ -41,12 +41,12 @@ public class UserController {
     @PutMapping
     public User put(@RequestBody User user) {
         UserValidator.validate(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Обновлены данные пользователя " + user.getEmail());
-            return user;
+        if (!users.containsKey(user.getId())) {
+            throw new NotExistException("Такого пользователя нет");
         }
-        throw new NotExistException("Такого пользователя нет");
+        users.put(user.getId(), user);
+        log.info("Обновлены данные пользователя " + user.getEmail());
+        return user;
     }
 
     public long generatedId() {
