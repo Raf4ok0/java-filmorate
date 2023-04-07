@@ -12,13 +12,15 @@ public class UserValidator {
     private static final String EMAIL_PATTERN = "^(.+)@(\\S+)$";
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\\s");
 
+    private static final Pattern PATTERN = Pattern.compile(EMAIL_PATTERN);
+
     public static void validate(User user) {
         if (user.getName() == null || user.getName().isBlank())
             user.setName(user.getLogin());
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Поле почты не заполнено");
             throw new ValidationException("Ошибка валидации");
-        } else if (!patternMatches(user.getEmail(), EMAIL_PATTERN)) {
+        } else if (!PATTERN.matcher(user.getEmail()).matches()) {
             log.error("Поле почты не корректно");
             throw new ValidationException("Ошибка валидации");
         } else if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().isBlank()) {
@@ -31,11 +33,5 @@ public class UserValidator {
             log.error("Дата рождения некорректна");
             throw new ValidationException("Ошибка валидации");
         }
-    }
-
-    public static boolean patternMatches(String emailAddress, String emailPattern) {
-        return Pattern.compile(emailPattern)
-                .matcher(emailAddress)
-                .matches();
     }
 }
