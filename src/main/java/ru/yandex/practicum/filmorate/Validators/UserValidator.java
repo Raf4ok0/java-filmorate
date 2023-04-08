@@ -14,14 +14,7 @@ public class UserValidator {
     private static final Logger log = LoggerFactory.getLogger(UserValidator.class);
     private static final String emailPattern = "^(.+)@(\\S+)$";
     private static final Pattern loginPattern = Pattern.compile("\\s");
-
-    public static boolean validate(User user) {
-        if (user.getName() == null || user.getName().isBlank())
-            user.setName(user.getLogin());
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            log.error("Поле почты не заполнено");
-            return false;
-        } else if (!patternMatches(user.getEmail(), emailPattern)) {
+    
             log.error("Поле почты не корректно");
             return false;
         } else if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().isBlank()) {
@@ -41,11 +34,5 @@ public class UserValidator {
             log.info("Проверка, существует ли пользователь");
             throw new NotFoundException("Такого пользователя нет");
         }
-    }
-
-    public static boolean patternMatches(String emailAddress, String emailPattern) {
-        return Pattern.compile(emailPattern)
-                .matcher(emailAddress)
-                .matches();
     }
 }

@@ -34,14 +34,6 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody User user) {
-        userService.inMemoryUserStorage.updateUser(user);
-        return ResponseEntity.ok(user);
-    }
-
-    @DeleteMapping("/{userId}")
-    public void delete(@PathVariable Integer userId) {
-        userService.inMemoryUserStorage.deleteUser(userId);
     }
 
     @GetMapping("/{id}")
