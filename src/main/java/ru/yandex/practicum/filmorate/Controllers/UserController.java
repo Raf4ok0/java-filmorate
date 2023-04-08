@@ -1,57 +1,73 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.Exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.Exception.NotExistException;
-import ru.yandex.practicum.filmorate.Validators.UserValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.Service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
-    private long userId = 0L;
+
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
-    public Collection<User> allUsers() {
-        return new ArrayList<>(users.values());
+    public List<User> allUsers() {
+        return userService.inMemoryUserStorage.getAllUsersList();
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        UserValidator.validate(user);
-        if (!users.containsKey(user.getId())) {
-            long id = generatedId();
-            user.setId(id);
-            users.put(user.getId(), user);
-            log.info("Добавлен пользователь " + user.getName());
-            return user;
-        }
-        throw new AlreadyExistException("Пользователь с электронной почтой " +
-                user.getEmail() + " уже зарегистрирован.");
+        userService.inMemoryUserStorage.addUser(user);
+        return user;
     }
 
     @PutMapping
-    public User put(@RequestBody User user) {
-        UserValidator.validate(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Обновлены данные пользователя " + user.getEmail());
-            return user;
-        }
-        throw new NotExistException("Такого пользователя нет");
+    public ResponseEntity put(@RequestBody User user) {
+        userService.inMemoryUserStorage.updateUser(user);
+        return ResponseEntity.ok(user);
     }
 
-    public long generatedId() {
-        userId++;
-        return userId;
+    @DeleteMapping("/{userId}")
+    public void delete(@PathVariable Integer userId) {
+        userService.inMemoryUserStorage.deleteUser(userId);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable int id) {
+        return new ResponseEntity<>(userService.inMemoryUserStorage.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/friends")
+    public ResponseEntity<List<User>> getFriends(@PathVariable Integer id) {
+        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public ResponseEntity<List<User>> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return new ResponseEntity<>(userService.getCommonFriendsList(id, otherId), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<List<User>> addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
+        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<List<User>> deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.deleteFriend(id, friendId);
+        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+    }
 }
