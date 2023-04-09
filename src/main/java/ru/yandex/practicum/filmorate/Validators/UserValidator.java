@@ -19,19 +19,17 @@ public class UserValidator {
             user.setName(user.getLogin());
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Поле почты не заполнено");
-            throw new ValidationException("Ошибка валидации");
         } else if (!PATTERN.matcher(user.getEmail()).matches()) {
             log.error("Поле почты не корректно");
-            throw new ValidationException("Ошибка валидации");
         } else if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().isBlank()) {
             log.error("Логин не заполнен");
-            throw new ValidationException("Ошибка валидации");
         } else if (LOGIN_PATTERN.matcher(user.getLogin()).find()) {
             log.error("Логин может быть с пробелом");
-            throw new ValidationException("Ошибка валидации");
         } else if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Дата рождения некорректна");
-            throw new ValidationException("Ошибка валидации");
+        } else {
+            return;
         }
+        throw new ValidationException("Ошибка валидации");
     }
 }
