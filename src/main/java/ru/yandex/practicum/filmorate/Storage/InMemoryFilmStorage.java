@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.Exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.Exception.NotFoundException;
-import ru.yandex.practicum.filmorate.Validators.FilmValidator;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        FilmValidator.validate(film);
         if (films.containsKey(film.getId())) {
             throw new AlreadyExistException("Фильм " +
                     film.getName() + " уже добавлен.");
@@ -49,7 +47,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        FilmValidator.validate(film);
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм " +
                     film.getName() + " не найден.");
@@ -60,9 +57,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(long id) {
+    public Film deleteFilm(long id) {
         if (films.containsKey(id)) {
-            films.remove(id);
+            return films.remove(id);
         } else {
             throw new NotFoundException("Такого фильма нет");
         }

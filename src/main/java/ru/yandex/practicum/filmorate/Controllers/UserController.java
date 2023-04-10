@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import ru.yandex.practicum.filmorate.Service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
@@ -13,61 +11,64 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     @GetMapping
     public List<User> allUsers() {
-        return userService.inMemoryUserStorage.getAllUsersList();
+        log.info("getAllUsersList");
+        return userService.getAllUsersList();
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        userService.inMemoryUserStorage.addUser(user);
-        return user;
+        log.info("addUser");
+        return userService.addUser(user);
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody User user) {
-        userService.inMemoryUserStorage.updateUser(user);
-        return ResponseEntity.ok(user);
+    public User put(@RequestBody User user) {
+        log.info("updateUser");
+        return userService.updateUser(user);
     }
 
     @DeleteMapping("/{userId}")
-    public void delete(@PathVariable long userId) {
-        userService.inMemoryUserStorage.deleteUser(userId);
+    public User delete(@PathVariable long userId) {
+        log.info("");
+        return userService.deleteUser(userId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long id) {
-        return new ResponseEntity<>(userService.inMemoryUserStorage.getById(id), HttpStatus.OK);
+    public User getUser(@PathVariable long id) {
+        log.info("getById");
+        return userService.getById(id);
     }
 
     @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getFriends(@PathVariable long id) {
-        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+    public List<User> getFriends(@PathVariable long id) {
+        log.info("getFriendsList");
+        return userService.getFriendsList(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
-        return new ResponseEntity<>(userService.getCommonFriendsList(id, otherId), HttpStatus.OK);
+    public List<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+        log.info("getCommonFriendsList");
+        return userService.getCommonFriendsList(id, otherId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<List<User>> addFriend(@PathVariable long id, @PathVariable long friendId) {
+    public List<User> addFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("getFriendsList");
         userService.addFriend(id, friendId);
-        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+        return userService.getFriendsList(id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<List<User>> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+    public List<User> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("deleteFriend");
         userService.deleteFriend(id, friendId);
-        return new ResponseEntity<>(userService.getFriendsList(id), HttpStatus.OK);
+        return userService.getFriendsList(id);
     }
 }

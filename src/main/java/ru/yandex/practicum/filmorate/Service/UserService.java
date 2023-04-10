@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.Service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Exception.NotFoundException;
 import ru.yandex.practicum.filmorate.Storage.UserStorage;
+import ru.yandex.practicum.filmorate.Validators.UserValidator;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -16,58 +15,69 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    public final UserStorage inMemoryUserStorage;
+    private final UserStorage storage;
 
-    @Autowired
-    public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public List<User> getAllUsersList() {
+        return storage.getAllUsersList();
+    }
+
+    public User getById(long id) {
+        return storage.getById(id);
+    }
+
+    public User deleteUser(long id) {
+        return storage.deleteUser(id);
+    }
+
+    public User addUser(User user) {
+        UserValidator.validate(user);
+        return storage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        UserValidator.validate(user);
+        return storage.updateUser(user);
     }
 
     public void addFriend(long userId, long friendId) {
         checkExistUser(userId);
         checkExistUser(friendId);
-        inMemoryUserStorage.getById(userId).getFriends().add(friendId);
-        inMemoryUserStorage.getById(friendId).getFriends().add(userId);
+        storage.getById(userId).getFriends().add(friendId);
+        storage.getById(friendId).getFriends().add(userId);
         log.info("Новый друг добавлен");
     }
 
     public void deleteFriend(long userId, long friendId) {
         checkExistUser(userId);
         checkExistUser(friendId);
-        inMemoryUserStorage.getById(userId).getFriends().remove(friendId);
-        inMemoryUserStorage.getById(friendId).getFriends().remove(userId);
+        storage.getById(userId).getFriends().remove(friendId);
+        storage.getById(friendId).getFriends().remove(userId);
         log.info("Друг удален");
     }
 
     public List<User> getFriendsList(long userId) {
         checkExistUser(userId);
-        List<User> userFriends = new ArrayList<>();
-        for (Long id : inMemoryUserStorage.getById(userId).getFriends()) {
-            userFriends.add(inMemoryUserStorage.getById(id));
-        }
-        return userFriends;
+        return storage.getById(userId).getFriends().stream()
+                .map(id -> storage.getById(id))
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriendsList(long userId, long otherId) {
         checkExistUser(userId);
         checkExistUser(otherId);
-        List<User> commonFriends = new ArrayList<>();
-        Set<Long> userList = inMemoryUserStorage.getById(userId).getFriends();
-        Set<Long> otherList = inMemoryUserStorage.getById(otherId).getFriends();
-        Set<Long> commonListIds = userList.stream()
-                .distinct()
+        Set<Long> userList = storage.getById(userId).getFriends();
+        Set<Long> otherList = storage.getById(otherId).getFriends();
+        return userList.stream()
                 .filter(otherList::contains)
-                .collect(Collectors.toSet());
-        for (Long id : commonListIds) {
-            commonFriends.add(inMemoryUserStorage.getById(id));
-        }
-        return commonFriends;
+                .map(id -> storage.getById(id))
+                .collect(Collectors.toList());
     }
 
     public void checkExistUser(Long userId) {
-        if (inMemoryUserStorage.getById(userId) == null) {
+        if (storage.getById(userId) == null) {
             throw new NotFoundException("Пользователь с таким ID не найден.");
         }
     }

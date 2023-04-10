@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Service.FilmService;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,54 +12,56 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
     private final FilmService filmService;
 
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
-
     @GetMapping
     public List<Film> getAllFilms() {
-        return filmService.inMemoryFilmStorage.getAllFilmsList();
+        log.info("getAllFilms");
+        return filmService.getAllFilmsList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Film> getFilm(@PathVariable long id) {
-        return new ResponseEntity<>(filmService.inMemoryFilmStorage.getById(id), HttpStatus.OK);
+    public Film getFilm(@PathVariable long id) {
+        log.info("getById #{}", id);
+        return filmService.getById(id);
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        filmService.inMemoryFilmStorage.addFilm(film);
-        return film;
+        log.info("addFilm");
+        return filmService.addFilm(film);
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody Film film) {
-        filmService.inMemoryFilmStorage.updateFilm(film);
-        return ResponseEntity.ok(film);
+    public Film put(@RequestBody Film film) {
+        log.info("updateFilm");
+        return filmService.updateFilm(film);
     }
 
     @DeleteMapping("/{filmId}")
-    public void delete(@PathVariable long filmId) {
-        filmService.inMemoryFilmStorage.deleteFilm(filmId);
+    public Film delete(@PathVariable long filmId) {
+        log.info("updateFilm");
+        return filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public ResponseEntity<Film> addLike(@PathVariable long id, @PathVariable long userId) {
+    public Film addLike(@PathVariable long id, @PathVariable long userId) {
+        log.info("addLike");
         return filmService.addLike(userId, id);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public ResponseEntity<Film> deleteLike(@PathVariable long id, @PathVariable long userId) {
+    public Film deleteLike(@PathVariable long id, @PathVariable long userId) {
+        log.info("deleteLike");
         return filmService.deleteLike(userId, id);
     }
 
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+        log.info("getTopLikedFilmsList");
         return filmService.getTopLikedFilmsList(count);
     }
 }

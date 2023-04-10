@@ -12,16 +12,16 @@ class UserValidatorTest {
     User user;
 
     void initUser() {
-        user = new User(1, "w3ww5@ff.ru", "Login", "Alex",
+        user = new User(1L, "w3ww5@ff.ru", "Login", "Alex",
                 LocalDate.of(1985, 12, 22));
     }
 
     @Test
     void userEmailCantBeEmpty() {
         initUser();
-        User user2 = new User(2, "", "Login", "Alex",
+        User user2 = new User(2L, "", "Login", "Alex",
                 LocalDate.of(1985, 12, 22));
-        User user3 = new User(3, " ", "Login", "Alex",
+        User user3 = new User(3L, " ", "Login", "Alex",
                 LocalDate.of(1985, 12, 22));
         assertDoesNotThrow(() -> UserValidator.validate(user));
         assertThrows(ValidationException.class, () -> UserValidator.validate(user2));

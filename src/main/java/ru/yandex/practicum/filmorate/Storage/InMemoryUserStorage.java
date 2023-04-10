@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.Exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.Exception.NotFoundException;
-import ru.yandex.practicum.filmorate.Validators.UserValidator;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -26,7 +25,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        UserValidator.validate(user);
         if (users.containsKey(user.getId())) {
             throw new AlreadyExistException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
@@ -41,7 +39,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        UserValidator.validate(user);
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Пользователь с электронной почтой " +
                     user.getEmail() + " не найден.");
@@ -52,9 +49,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(long id) {
+    public User deleteUser(long id) {
         if (users.containsKey(id)) {
-            users.remove(id);
+            return users.remove(id);
         } else {
             throw new NotFoundException("Пользователь не найден");
         }
