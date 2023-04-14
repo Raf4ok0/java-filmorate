@@ -43,14 +43,14 @@ public class FilmService {
 
     public Film addLike(long userId, long filmId) throws NotFoundException {
         checkExistFilm(filmId);
-        storage.getById(filmId).getLikes().add(userId);
+        storage.addLike(filmId, userId);
         log.info("Лайк добавлен");
         return storage.getById(filmId);
     }
 
     public Film deleteLike(long filmId, long userId) throws NotFoundException {
         checkExistFilm(filmId);
-        storage.getById(filmId).getLikes().remove(userId);
+        storage.removeLike(filmId, userId);
         log.info("Лайк удален");
         return storage.getById(filmId);
     }
