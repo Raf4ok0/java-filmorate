@@ -44,16 +44,14 @@ public class UserService {
     public void addFriend(long userId, long friendId) {
         checkExistUser(userId);
         checkExistUser(friendId);
-        storage.getById(userId).getFriends().add(friendId);
-        storage.getById(friendId).getFriends().add(userId);
+        storage.addFriend(userId, friendId);
         log.info("Новый друг добавлен");
     }
 
     public void deleteFriend(long userId, long friendId) {
         checkExistUser(userId);
         checkExistUser(friendId);
-        storage.getById(userId).getFriends().remove(friendId);
-        storage.getById(friendId).getFriends().remove(userId);
+        storage.deleteFriend(userId, friendId);
         log.info("Друг удален");
     }
 
